@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express from "express";
+//import Discord from 'discord.js';
 import {
   InteractionType,
   InteractionResponseType,
@@ -17,13 +18,20 @@ import { getShuffledOptions, getResult } from "./game.js";
 // Create an express app
 const app = express();
 // Get port, or default to 3000
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3002;
 // Parse request body and verifies incoming requests using discord-interactions package
 console.log("process.env.PUBLIC_KEY", process.env.PUBLIC_KEY);
 app.use(express.json({ verify: VerifyDiscordRequest(process.env.PUBLIC_KEY) }));
 
 // Store for in-progress games. In production, you'd want to use a DB
 const activeGames = {};
+/*const discordClient = new Discord.Client();
+
+discordClient.on('ready', () => {
+  console.log(`Logged in as ${discordClient.user.tag}!`)
+})
+
+discordClient.login(process.env.DISCORD_TOKEN)*/
 
 /**
  * Interactions endpoint URL where Discord will send HTTP requests
