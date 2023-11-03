@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node bot.js",
     "register": "node commands.js",
-    "dev": "npm run register && nodemon bot.js"
+    "dev": "nodemon bot.js"
   },
   "author": "Shay DeWael",
   "license": "MIT",
