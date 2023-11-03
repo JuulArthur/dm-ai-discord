@@ -1,53 +1,25 @@
-import 'dotenv/config';
-import { getRPSChoices } from './game.js';
-import { capitalize, InstallGlobalCommands } from './utils.js';
+import { REST, Routes } from 'discord.js';
+import "dotenv/config";
 
-// Get the game choices from game.js
-function createCommandChoices() {
-  const choices = getRPSChoices();
-  const commandChoices = [];
-
-  for (let choice of choices) {
-    commandChoices.push({
-      name: capitalize(choice),
-      value: choice.toLowerCase(),
-    });
+const commands = [
+  {
+    name: 'dm-join',
+    description: 'Joins channel!',
+  },
+  {
+    name: 'dm-leave',
+    description: 'Leaves voice channel'
   }
+];
 
-  return commandChoices;
+const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN);
+
+try {
+  console.log('Started refreshing application (/) commands.');
+
+  await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body: commands });
+
+  console.log('Successfully reloaded application (/) commands.');
+} catch (error) {
+  console.error(error);
 }
-
-// Simple test command
-const TEST_COMMAND = {
-  name: 'test',
-  description: 'Basic command',
-  type: 1,
-};
-
-// Command containing options
-const CHALLENGE_COMMAND = {
-  name: 'challenge',
-  description: 'Challenge to a match of rock paper scissors',
-  options: [
-    {
-      type: 3,
-      name: 'object',
-      description: 'Pick your object',
-      required: true,
-      choices: createCommandChoices(),
-    },
-  ],
-  type: 1,
-};
-
-// Join voice
-const JOIN_COMMAND = {
-  name: 'join',
-  description: 'Join voice',
-  type: 1,
-  intents: [128],
-};
-
-const ALL_COMMANDS = [TEST_COMMAND, CHALLENGE_COMMAND, JOIN_COMMAND];
-
-InstallGlobalCommands(process.env.APP_ID, ALL_COMMANDS);
