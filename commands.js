@@ -40,6 +40,14 @@ const CHALLENGE_COMMAND = {
   type: 1,
 };
 
-const ALL_COMMANDS = [TEST_COMMAND, CHALLENGE_COMMAND];
+// Join voice
+const JOIN_COMMAND = {
+  name: 'join',
+  description: 'Join voice',
+  type: 1,
+  intents: [128],
+};
+
+const ALL_COMMANDS = [TEST_COMMAND, CHALLENGE_COMMAND, JOIN_COMMAND];
 
 InstallGlobalCommands(process.env.APP_ID, ALL_COMMANDS);

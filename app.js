@@ -1,5 +1,7 @@
 import "dotenv/config";
 import express from "express";
+import session from 'express-session';
+import passport from 'passport';
 //import Discord from 'discord.js';
 import {
   InteractionType,
@@ -14,6 +16,8 @@ import {
   DiscordRequest,
 } from "./utils.js";
 import { getShuffledOptions, getResult } from "./game.js";
+import {handleConnectToChannelInteraction} from "./voice.js";
+import authRoutes from './auth.js';
 
 // Create an express app
 const app = express();
@@ -32,6 +36,17 @@ discordClient.on('ready', () => {
 })
 
 discordClient.login(process.env.DISCORD_TOKEN)*/
+app.use(session({
+  secret: 'verysecret',
+  resave: false,
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24 * 365
+  },
+  saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 /**
  * Interactions endpoint URL where Discord will send HTTP requests
@@ -55,7 +70,7 @@ app.post("/interactions", async function (req, res) {
     const { name } = data;
 
     // "test" command
-    if (name === "test") {
+    if (name === "testing") {
       // Send a message into the channel where command was triggered from
       return res.send({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -95,6 +110,16 @@ app.post("/interactions", async function (req, res) {
               ],
             },
           ],
+        },
+      });
+    }
+    if (name === "join") {
+      console.log('req.body', req.body);
+      //handleConnectToChannelInteraction();
+      return res.send({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          content: `Rock papers scissors challenge from me`,
         },
       });
     }
@@ -177,6 +202,8 @@ app.post("/interactions", async function (req, res) {
     }
   }
 });
+
+app.use('/auth', authRoutes);
 
 app.listen(PORT, () => {
   console.log("Listening on port", PORT);
