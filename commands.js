@@ -1,4 +1,4 @@
-import { REST, Routes } from 'discord.js';
+import { REST, Routes, ApplicationCommandType } from 'discord.js';
 import "dotenv/config";
 
 const commands = [
@@ -6,14 +6,28 @@ const commands = [
     name: 'dm-join',
     description: 'Joins channel!',
   },
-
+  {
+    name: 'dm-record',
+    description: 'Enables recording for a user',
+    options: [
+      {
+        name: 'speaker',
+        type: ApplicationCommandType.User,
+        description: 'The user to record',
+      },
+    ],
+  },
   {
     name: 'dm-leave',
     description: 'Leaves voice channel'
   },  {
     name: 'dm-music',
     description: 'Play me a song'
-  },{name: 'dm-stop-music', description: 'Stop the music'}
+  },{name: 'dm-stop-music', description: 'Stop the music'},
+  {
+    name: 'dm-me',
+    description: 'Nothing',
+  },
 ];
 
 const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN);

@@ -6,10 +6,11 @@ import {
     entersState,
     joinVoiceChannel,
     VoiceConnection,
-    StreamType
+    StreamType, VoiceConnectionStatus
 } from '@discordjs/voice';
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildVoiceStates] });
 import "dotenv/config";
+import { createListeningStream } from './createListeningStream.js';
 
 let connection;
 const player = createAudioPlayer();
@@ -29,7 +30,7 @@ const stopSong = () => {
     return;
 }
 
-const connectToVoiceChannel = ({interaction}) => {
+const connectToVoiceChannelMusic = async ({interaction}) => {
     connection = joinVoiceChannel({
         channelId: interaction.member.voice.channel.id,
         guildId: interaction.guild.id,
@@ -37,6 +38,55 @@ const connectToVoiceChannel = ({interaction}) => {
     })
 
     connection.subscribe(player);
+    await interaction.reply('Hello there!');
+}
+
+
+const connectToVoiceChannel = async ({interaction}) => {
+    connection = joinVoiceChannel({
+        channelId: interaction.member.voice.channel.id,
+        guildId: interaction.guild.id,
+        adapterCreator: interaction.guild.voiceAdapterCreator,
+    })
+
+    try {
+        await entersState(connection, VoiceConnectionStatus.Ready, 20e3);
+
+        await createListeningStream({interaction, connection})
+    } catch (error) {
+        console.warn(error);
+        await interaction.followUp('Failed to join voice channel within 20 seconds, please try again later!');
+    }
+
+    await interaction.reply('Ready!');
+}
+
+async function leave({
+                         interaction,
+                     }) {
+    if (connection) {
+        connection.destroy();
+        await interaction.reply({ ephemeral: true, content: 'Left the channel!' });
+    } else {
+        await interaction.reply({ ephemeral: true, content: 'Not playing in this server!' });
+    }
+}
+
+async function record(
+    interaction,
+) {
+    if (connection) {
+        const userId = interaction.options.get('speaker').value;
+
+        const receiver = connection.receiver;
+        if (connection.receiver.speaking.users.has(userId)) {
+            createListeningStream(receiver, userId, client.users.cache.get(userId));
+        }
+
+        await interaction.reply({ ephemeral: true, content: 'Listening!' });
+    } else {
+        await interaction.reply({ ephemeral: true, content: 'Join a voice channel and then try that again!' });
+    }
 }
 
 client.on('ready', () => {
@@ -47,17 +97,19 @@ client.on('interactionCreate', async interaction => {
     if (!interaction.isChatInputCommand()) return;
 
     if (interaction.commandName === 'dm-join') {
-        connectToVoiceChannel({interaction});
-        await interaction.reply('Hello there!');
+        await connectToVoiceChannel({interaction});
     } else if (interaction.commandName === 'dm-leave') {
-        connection.disconnect();
-        await interaction.reply('Bye then!');
+        //connection.disconnect();
+        await leave({interaction})
     } else if (interaction.commandName === 'dm-music') {
         await playSong();
         await interaction.reply('Blasting music!');
     } else if (interaction.commandName === 'dm-stop-music') {
         await stopSong();
         await interaction.reply('So quiet...');
+    } else if (interaction.commandName === 'record') {
+        await record();
+        await interaction.reply('Im listening');
     }
 });
 
