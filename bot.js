@@ -52,7 +52,7 @@ const connectToVoiceChannel = async ({interaction}) => {
     try {
         await entersState(connection, VoiceConnectionStatus.Ready, 20e3);
 
-        await createListeningStream({interaction, connection})
+        await createListeningStream({interaction, connection, client})
     } catch (error) {
         console.warn(error);
         await interaction.followUp('Failed to join voice channel within 20 seconds, please try again later!');
