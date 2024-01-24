@@ -6,7 +6,7 @@ import {
     entersState,
     joinVoiceChannel,
     VoiceConnection,
-    StreamType, VoiceConnectionStatus
+    StreamType, VoiceConnectionStatus,
 } from '@discordjs/voice';
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildVoiceStates] });
 import "dotenv/config";
