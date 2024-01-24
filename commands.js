@@ -1,45 +1,45 @@
-import 'dotenv/config';
-import { getRPSChoices } from './game.js';
-import { capitalize, InstallGlobalCommands } from './utils.js';
+import { REST, Routes, ApplicationCommandType } from 'discord.js';
+import "dotenv/config";
 
-// Get the game choices from game.js
-function createCommandChoices() {
-  const choices = getRPSChoices();
-  const commandChoices = [];
+const commands = [
+  {
+    name: 'dm-join',
+    description: 'Joins channel!',
+  },
+  {
+    name: 'dm-record',
+    description: 'Enables recording for a user',
+    options: [
+      {
+        name: 'speaker',
+        type: ApplicationCommandType.User,
+        description: 'The user to record',
+      },
+    ],
+  },
+  {
+    name: 'dm-leave',
+    description: 'Leaves voice channel'
+  },  {
+    name: 'dm-music',
+    description: 'Play me a song'
+  },{name: 'dm-stop-music', description: 'Stop the music'},
+  {
+    name: 'dm-me',
+    description: 'Nothing',
+  },
+];
 
-  for (let choice of choices) {
-    commandChoices.push({
-      name: capitalize(choice),
-      value: choice.toLowerCase(),
-    });
-  }
+const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN);
 
-  return commandChoices;
+try {
+  console.log('Started refreshing application (/) commands.');
+
+  const result = await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body: commands });
+  console.log('result', result);
+  console.log('commands', commands);
+
+  console.log('Successfully reloaded application (/) commands.');
+} catch (error) {
+  console.error(error);
 }
-
-// Simple test command
-const TEST_COMMAND = {
-  name: 'test',
-  description: 'Basic command',
-  type: 1,
-};
-
-// Command containing options
-const CHALLENGE_COMMAND = {
-  name: 'challenge',
-  description: 'Challenge to a match of rock paper scissors',
-  options: [
-    {
-      type: 3,
-      name: 'object',
-      description: 'Pick your object',
-      required: true,
-      choices: createCommandChoices(),
-    },
-  ],
-  type: 1,
-};
-
-const ALL_COMMANDS = [TEST_COMMAND, CHALLENGE_COMMAND];
-
-InstallGlobalCommands(process.env.APP_ID, ALL_COMMANDS);
